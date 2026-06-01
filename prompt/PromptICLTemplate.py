@@ -30,9 +30,12 @@ class BasicICLPrompt(object):
             return []
 
     def record_pattern_similarity(self, examples, target):
+        if "question_pattern" not in target:
+            return
         similarity_list = []
         for example in examples:
-            similarity_list.append(jaccard_similarity(example["question_pattern"], target["question_pattern"]))
+            ex_pattern = example.get("question_pattern", example.get("question", ""))
+            similarity_list.append(jaccard_similarity(ex_pattern, target["question_pattern"]))
         self.pattern_similarities.append(similarity_list)
 
     def get_pattern_similarity(self):

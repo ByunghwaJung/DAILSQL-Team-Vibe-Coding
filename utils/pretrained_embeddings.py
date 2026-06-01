@@ -7,6 +7,7 @@ import bpemb
 import corenlp
 import torch
 import torchtext
+import torchtext.vocab
 
 from utils.linking_utils import corenlp
 

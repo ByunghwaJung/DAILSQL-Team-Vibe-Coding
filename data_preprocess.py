@@ -13,7 +13,7 @@ from utils.datasets.spider import load_tables
 # from dataset.process.preprocess_kaggle import gather_questions
 
 
-def schema_linking_producer(test, train, table, db, dataset_dir, compute_cv_link=True):
+def schema_linking_producer(test, train, table, db, dataset_dir, compute_cv_link=True, dev_only=False):
 
     # load data
     test_data = json.load(open(os.path.join(dataset_dir, test)))
@@ -43,7 +43,8 @@ def schema_linking_producer(test, train, table, db, dataset_dir, compute_cv_link
             compute_cv_link=compute_cv_link)
 
     # build schema-linking
-    for data, section in zip([test_data, train_data],['test', 'train']):
+    data_sections = [(test_data, 'test')] if dev_only else [(test_data, 'test'), (train_data, 'train')]
+    for data, section in data_sections:
         for item in tqdm(data, desc=f"{section} section linking"):
             db_id = item["db_id"]
             schema = schemas[db_id]
@@ -107,6 +108,7 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument("--data_dir", type=str, default="./dataset/spider")
     parser.add_argument("--data_type", type=str, choices=["spider", "bird"], default="spider")
+    parser.add_argument("--dev_only", action="store_true", help="Only process dev set, skip train linking")
     args = parser.parse_args()
 
     data_type = args.data_type
@@ -128,7 +130,7 @@ if __name__ == '__main__':
         spider_train = 'train_spider_and_others.json'
         spider_table = 'tables.json'
         spider_db = 'database'
-        schema_linking_producer(spider_dev, spider_train, spider_table, spider_db, spider_dir)
+        schema_linking_producer(spider_dev, spider_train, spider_table, spider_db, spider_dir, dev_only=args.dev_only)
     elif data_type == "bird":
         # schema-linking for bird with evidence
         bird_dir = './dataset/bird'
